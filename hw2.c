@@ -1,4 +1,5 @@
 #define LINES_TO_READ 10
+#define ERROR -1
 
 //typedef = allows us to descirbe our own data type.
 #include <sys/types.h>
@@ -23,7 +24,7 @@ int main(int ac, char* args[]) {
     }
     FD fd_source = open(args[1], O_RDONLY); //open the source file.
 
-    if(fd_source == -1) {
+    if(fd_source == ERROR) {
         write(2, "Failed to open file.\n", 22);
         exit(EXIT_FAILURE);
     }
@@ -83,7 +84,7 @@ int main(int ac, char* args[]) {
 //          exit(EXIT_FAILURE);
 //      }
        //Attempt to close the files.
-      if(close(fd_source) == -1 || close(fd_source) == -1) {
+      if(close(fd_source) == ERROR) {
           write(fd_source, buffer, bytes_read);
           //Note use more descripter.
           exit(EXIT_FAILURE);
