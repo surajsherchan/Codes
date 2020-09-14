@@ -1,5 +1,4 @@
 #define LINES_TO_READ 10
-#define ERROR -1
 
 //typedef = allows us to descirbe our own data type.
 #include <sys/types.h>
@@ -12,24 +11,20 @@
 typedef int FD;
 
 int main(int ac, char* args[]) {
-//    char* filename;
-//    //Give pointer to read from args[i].
-//    for(int i=0; i<ac; i++) {
-//        filename = args[i];
-//    }
 
+    //If no arguments are given print error.
     if(ac < 2) {
         write(2, "no agruments given.\n", 21);
         exit(EXIT_FAILURE);
     }
     FD fd_source = open(args[1], O_RDONLY); //open the source file.
-
-    if(fd_source == ERROR) {
+//If source failed to open print error msg and quit.
+    if(fd_source == -1) {
         write(2, "Failed to open file.\n", 22);
         exit(EXIT_FAILURE);
     }
-    FD fd_dest = open(args[1], O_WRONLY, 0644); //third arg = permissions for file.
-    //permissions are manipulated for using octal.
+    //Open the destination file to write in.
+    FD fd_dest = open(args[1], O_WRONLY, 0644);
 
      //verify that the destination file was opened.
     if(fd_dest == -1) {
@@ -43,7 +38,7 @@ int main(int ac, char* args[]) {
     int bytes_read = 0;
     int write_result;
     int lines = 1; //variable to count the number of lines read.
-    int index = 0;
+    int index;
 //While something is read, write it.
     while((bytes_read = read(fd_source, &ch, 1)) > 0) {
         write_result = write(fd_source, buffer, bytes_read);
@@ -51,11 +46,13 @@ int main(int ac, char* args[]) {
         if(ch == '\n') {
             buffer[index] = ch;
             buffer[index+1] = '\0';
+            ch = 0;
+            index = 0;
 //
-//            write_result = 0;
-            int buff_length = strlen(buffer);
-            while(write_result != buff_length) {
-                int res = write(STDOUT_FILENO, buffer + write_result, buff_length-write_result);
+            write_result = 0;
+            int buff_len = strlen(buffer);
+            while(write_result != buff_len) {
+                int res = write(STDOUT_FILENO, buffer + write_result, buff_len - write_result);
 
                 if(write_result < 0) {
                     write(2, "Failed to write.\n",18);
@@ -72,19 +69,15 @@ int main(int ac, char* args[]) {
         } else {
             buffer[index++] = ch;
         }
-
-//           if(write_result == -1) {
-//               break;
-//           }
     }
 
 //    If ever error occurs during read and write quit and print error msg.
-//      if (bytes_read == -1 || write_result == -1) {
-//          write(fd_source, buffer, bytes_read);
-//          exit(EXIT_FAILURE);
-//      }
+      if (bytes_read == -1 || write_result == -1) {
+          write(fd_source, buffer, bytes_read);
+          exit(EXIT_FAILURE);
+      }
        //Attempt to close the files.
-      if(close(fd_source) == ERROR) {
+      if(close(fd_source) == -1) {
           write(fd_source, buffer, bytes_read);
           //Note use more descripter.
           exit(EXIT_FAILURE);
@@ -93,6 +86,4 @@ int main(int ac, char* args[]) {
     return 0;
 
 }
-
-
 
